@@ -17,7 +17,7 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
-    @PostMapping
+    @PostMapping(path = "/register")
     public void RegisterCustomer(@RequestBody CustomerRegistrationRequest customerRegistrationRequest) {
         log.info("New customer registration {}", customerRegistrationRequest);
         customerService.registerCustomer(customerRegistrationRequest);

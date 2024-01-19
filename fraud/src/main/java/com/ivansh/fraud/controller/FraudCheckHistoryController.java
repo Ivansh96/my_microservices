@@ -1,6 +1,6 @@
 package com.ivansh.fraud.controller;
 
-import com.ivansh.fraud.dto.FraudCheckResponse;
+import com.ivansh.clients.fraud.FraudCheckResponse;
 import com.ivansh.fraud.service.FraudCheckHistoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

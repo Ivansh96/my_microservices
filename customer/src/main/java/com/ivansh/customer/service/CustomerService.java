@@ -1,6 +1,7 @@
 package com.ivansh.customer.service;
 
-import com.ivansh.customer.FraudCheckResponse;
+import com.ivansh.clients.fraud.FraudCheckResponse;
+import com.ivansh.clients.fraud.FraudClient;
 import com.ivansh.customer.dto.CustomerRegistrationRequest;
 import com.ivansh.customer.dal.repository.CustomerRepository;
 import com.ivansh.customer.dal.entity.Customer;
@@ -13,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
-    private final RestTemplate restTemplate;
+    private final FraudClient fraudClient;
 
     public void registerCustomer(CustomerRegistrationRequest customerRegistrationRequest) {
         Customer customer = Customer.builder()
@@ -24,11 +25,7 @@ public class CustomerService {
 
         customerRepository.saveAndFlush(customer);
 
-        FraudCheckResponse fraudCheckResponse = restTemplate.getForObject(
-                "http://localhost:8081/api/v1/fraud-check/{customerId}",
-                FraudCheckResponse.class,
-                customer.getId()
-        );
+        FraudCheckResponse fraudCheckResponse = fraudClient.isFraudster(customer.getId());
 
         if (fraudCheckResponse.isFraudster()) {
             throw new IllegalArgumentException("Fraudster");
