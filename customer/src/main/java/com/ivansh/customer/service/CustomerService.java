@@ -2,6 +2,8 @@ package com.ivansh.customer.service;
 
 import com.ivansh.clients.fraud.FraudCheckResponse;
 import com.ivansh.clients.fraud.FraudClient;
+import com.ivansh.clients.notification.NotificationClient;
+import com.ivansh.clients.notification.NotificationRequest;
 import com.ivansh.customer.dto.CustomerRegistrationRequest;
 import com.ivansh.customer.dal.repository.CustomerRepository;
 import com.ivansh.customer.dal.entity.Customer;
@@ -15,6 +17,7 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
     private final FraudClient fraudClient;
+    private final NotificationClient notificationClient;
 
     public void registerCustomer(CustomerRegistrationRequest customerRegistrationRequest) {
         Customer customer = Customer.builder()
@@ -30,6 +33,15 @@ public class CustomerService {
         if (fraudCheckResponse.isFraudster()) {
             throw new IllegalArgumentException("Fraudster");
         }
+
+        notificationClient.sendNotification(
+                new NotificationRequest(
+                        customer.getId(),
+                        customer.getEmail(),
+                        String.format("Hello %s!",
+                                customer.getFirstname())
+                )
+        );
 
         // todo check if email valid
         // todo check if email not taken
