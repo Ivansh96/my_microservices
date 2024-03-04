@@ -1,5 +1,6 @@
 package com.ivansh.customer.service;
 
+import com.ivansh.amqp.cofiguration.RabbitMQMessageProducer;
 import com.ivansh.clients.fraud.FraudCheckResponse;
 import com.ivansh.clients.fraud.FraudClient;
 import com.ivansh.clients.notification.NotificationClient;
@@ -17,7 +18,7 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
     private final FraudClient fraudClient;
-    private final NotificationClient notificationClient;
+    private final RabbitMQMessageProducer rabbitMQMessageProducer;
 
     public void registerCustomer(CustomerRegistrationRequest customerRegistrationRequest) {
         Customer customer = Customer.builder()
@@ -34,13 +35,16 @@ public class CustomerService {
             throw new IllegalArgumentException("Fraudster");
         }
 
-        notificationClient.sendNotification(
-                new NotificationRequest(
-                        customer.getId(),
-                        customer.getEmail(),
-                        String.format("Hello %s!",
-                                customer.getFirstname())
-                )
+        NotificationRequest notificationRequest = new NotificationRequest(
+                customer.getId(),
+                customer.getEmail(),
+                String.format("Hello %s!",
+                        customer.getFirstname())
+        );
+        rabbitMQMessageProducer.publish(
+                notificationRequest,
+                "internal.exchange",
+                "internal.notification.routing-key"
         );
 
         // todo check if email valid
